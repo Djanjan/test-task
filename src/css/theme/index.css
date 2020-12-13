@@ -1,0 +1,51 @@
+:root, .ui-dark-blue {
+  --color-primary: hsla(202, 91%, 13%, 1);
+  --color-secondary: hsla(198, 48%, 63%, 1);
+  --color-bg: white;
+  --color-contrast-lower: hsl(240, 1%, 90%);
+  --color-contrast-low: hsl(240, 1%, 83%);
+  --color-contrast-medium: hsl(240, 1%, 48%);
+  --color-contrast-high: hsl(240, 4%, 20%);
+  --color-contrast-higher: black;
+
+  --dark-sky-blue: hsla(198, 48%, 63%, 1);
+  --steel-teal: hsla(187, 29%, 44%, 1);
+  --mountain-meadow: hsla(163, 91%, 39%, 1);
+  --princeton-orange: hsla(26, 84%, 55%, 1);
+  --light-green: hsl(123, 43%, 59%);
+}
+
+.ui-dark-blue {
+  background-color: var(--color-bg);
+  color: var(--color-contrast-high);
+}
+
+.color-primary:not(.v-btn--outlined) {
+  background-color: var(--color-primary);
+  border-color:var(--color-primary);
+  color: white;
+}
+
+.color-primary--text {
+  color: var(--color-primary);
+  caret-color: var(--color-primary);
+}
+
+.color-secondary:not(.v-btn--outlined) {
+  background-color: var(--color-secondary);
+  border-color:var(--color-secondary);
+  color: white;
+}
+
+.color-secondary--text {
+  color: var(--color-secondary);
+  caret-color: var(--color-secondary);
+}
+
+.color-white--text {
+  color: white;
+}
+
+.color-black--text {
+  color: black;
+}

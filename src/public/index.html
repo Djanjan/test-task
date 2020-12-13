@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&amp;display=swap&amp;subset=cyrillic" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" href="favicon.ico" />
+    <title>Parseq Tests</title>
+  </head>
+  <body>
+    <div id="app-container" data-v-app="">
+      <div id="app" class="ui-dark-blue" data-theme="default">
+        <div class="toolbar flex">
+          <span class="ml-1">Parseq Tests</span>
+          <nav class="nav">
+            <a href="/runs" class="nav__link">Запуски</a
+            ><a href="/analyses" class="nav__link">Анализы</a>
+          </nav>
+          <a href="/dataUpload" class="ml-auto" style="text-decoration: none;"
+            ><button
+              class="md-btn-contained"
+              style="color: white; text-decoration: none; background-color: var(--mountain-meadow);"
+            >
+              Загрузить данные
+            </button></a
+          >
+          <div class="user-menu mh-1" tabindex="-1">
+            <button class="user-menu--btn flex" style="padding: 0.5rem 0.8rem;">
+              <span class="ellipsis" style="flex-grow: 0; padding: 0.5rem;"
+                >aslepchenkov</span
+              >
+            </button>
+          </div>
+        </div>
+        <div class="analysis-container">
+          <div class="metadata">
+            <a href="/runs/1">CPTKH6</a
+            ><span class="mh-1 mr-2">23.11.2020</span>
+            <h4>Test sample 01</h4>
+            <span class="ml-1 mr-2">S1</span>
+            <div class="flex mr-2" style="align-items: baseline;">
+              <div class="tooltip-container">
+                <span class="mh-1">TEST v1</span>
+              </div>
+              <div class="badge lot-badge lot-badge--succeeded">1210-0</div>
+            </div>
+          </div>
+          <div class="tab-container">
+            <div id="genetic-variants"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
