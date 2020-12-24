@@ -46,17 +46,17 @@ watch(state.variants, () => {
 function filter(value: string) {
   state.variantsFiltered = state.variants.filter((item) => {
     if (item.genotype?.includes(value)) return true;
+    if (JSON.stringify(item.hgvs).includes(value)) return true;
     for (const key in item) {
-      if (Object.prototype.hasOwnProperty.call(item, key)) {
-        if (key !== 'id') {
-          const element = item[key];
+      if (key !== 'id') {
+        const element = item[key];
 
-          if (typeof element === 'object') {
-            if (JSON.stringify(element).includes(value)) return true;
-            return false;
-          }
-          if ((element as string).includes(value)) return true;
+        if (element.type !== undefined) {
+          if ((element.text as string).includes(value)) return true;
+          return false;
         }
+
+        if ((element as string).includes(value)) return true;
       }
     }
     return false;
