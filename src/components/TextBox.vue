@@ -1,7 +1,7 @@
 <template>
-  <div class="v-imput__content">
+  <div class="v-imput">
     <input
-      class="v-imput"
+      class="v-imput__control"
       id="text-box"
       type="text"
       v-model="input"
@@ -34,7 +34,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.v-imput {
+.v-imput__control {
   border-style: none;
   border: none;
   border-bottom: 2px solid var(--color-secondary);
