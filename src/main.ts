@@ -8,4 +8,4 @@ import './css/typography/index.css';
 
 import App from './App.vue';
 
-createApp(App).mount('#genetic-variants');
+createApp(App).mount('.main__wrap');

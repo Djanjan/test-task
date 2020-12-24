@@ -35,6 +35,12 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.main__wrap {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 2rem;
+}
+
 .flex {
   display: flex;
   align-items: center;

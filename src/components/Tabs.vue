@@ -1,10 +1,11 @@
 <template>
   <div class="tabs">
-    <div class="tabs__group">
+    <div class="tabs__group" role="tablist">
       <div
         v-for="tab in tabs"
         :key="tab"
         role="tab"
+        :aria-selected="currentTab === tab"
         :class="['tab ', { active: currentTab === tab }]"
         @click="currentTab = tab"
       >
