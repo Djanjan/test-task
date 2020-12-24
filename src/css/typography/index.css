@@ -16,13 +16,16 @@ body {
 tr > td {
   font-size: .875rem;
   height: 48px;
-  text-align: center;
+  word-wrap: break-word;
+  text-align: start;
 }
 
 tr > th {
   user-select: none;
   font-size: .75rem;
   font-weight: bold;
+  text-align: start;
+  color: var(--color-contrast-medium);
 }
 
 .font-primary {

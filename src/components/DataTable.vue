@@ -1,6 +1,6 @@
 <template>
   <div class="data-table">
-    <data-table-content>
+    <data-table-content :fixed="isFixed">
       <template v-slot:headers>
         <tr>
           <th
@@ -9,103 +9,159 @@
             v-for="(item, index) in headers"
             :key="index"
             :aria-label="item.name"
+            :style="{ width: item.columWidth }"
           >
             <span>{{ item.name }}</span>
           </th>
         </tr>
       </template>
-      <template v-slot:default>
-        <tr class v-for="(item, index) in items" :key="index">
-          <td v-for="(prop, index) in headers" :key="index">
-            <template v-if="prop.isExpansion">
-              <details>
-                <summary>
-                  <ul>
-                    <li class="titleName">
-                      Просмотреть внешнии источники
-                    </li>
-                  </ul>
-                </summary>
-                <div class="content">
-                  <data-table-content style="border: 1px solid black;">
-                    <template v-slot:headers>
-                      <tr>
-                        <th
-                          role="columnheader"
-                          scope="col"
-                          v-for="(itemHead, index) in getObjectKeys(
-                            item[prop.value][0]
-                          )"
-                          :key="index"
-                          :aria-label="itemHead"
-                        >
-                          <span>{{ itemHead }}</span>
-                        </th>
-                      </tr>
-                    </template>
-                    <template v-slot:default>
-                      <tr
-                        v-for="(expItem, index) in item[prop.value]"
-                        :key="index"
-                      >
-                        <td
-                          v-for="(expItemProp, index) in expItem"
-                          :key="index"
-                        >
-                          {{ expItemProp }}
-                        </td>
-                      </tr>
-                    </template>
-                  </data-table-content>
-                </div>
-              </details>
-            </template>
-
+      <template v-if="items" v-slot:default>
+        <tr class v-for="(item, index) in itemsDisplay" :key="index">
+          <td role="cell" v-for="(prop, index) in headers" :key="index" :aria-label="prop.value">
+            <template v-if="isSlot(prop.value)"><slot :name="prop.value" :item="item"></slot></template>
             <template v-else>{{ item[prop.value] }}</template>
           </td>
         </tr>
       </template>
     </data-table-content>
-    <data-table-footer :maxPage="items.length"></data-table-footer>
+    <div class="data-footer mt-2">
+      <div class="data-footer__select mr-1">
+        Отображемые строки:
+        <combo-box class="ml-1" v-model="limitPage" :items="getDisplayedData"></combo-box>
+      </div>
+
+      <div class="data-footer__pagination mr-2 ml-2">
+        {{ `${page}-${getLimitPageFix} of ${maxPage}` }}
+      </div>
+
+      <div class="data-footer__navigation">
+        <button
+          aria-label="first-page"
+          class="md-btn-icon md-btn-round"
+          style="color: var(--color-secondary)"
+          @click="firstPage"
+        >
+          <i class="material-icons">first_page</i>
+        </button>
+        <button
+          aria-label="previous-page"
+          class="md-btn-icon md-btn-round ml-1"
+          style="color: var(--color-secondary)"
+          @click="previousPage"
+        >
+          <i class="material-icons">keyboard_arrow_left</i>
+        </button>
+        <button
+          aria-label="next-page"
+          class="md-btn-icon md-btn-round ml-1"
+          style="color: var(--color-secondary)"
+          @click="nextPage"
+        >
+          <i class="material-icons">keyboard_arrow_right</i>
+        </button>
+        <button
+          aria-label="last-page"
+          class="md-btn-icon md-btn-round ml-1"
+          style="color: var(--color-secondary)"
+          @click="lastPage"
+        >
+          <i class="material-icons">last_page</i>
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { computed, defineComponent, onBeforeMount, onUpdated, ref } from 'vue';
 
-import DataTableFooter from "./DataTableFooter.vue";
-import DataTableContent from "./DataTableContent.vue";
+import DataTableContent from '@/components/DataTableContent.vue';
+import ComboBox from '@/components/ComboBox.vue';
+
+import { usePagination } from '@/composables/GeneticVariantsPagination';
 
 export default defineComponent({
-  name: "DataTableContent",
+  name: 'DataTable',
   components: {
-    "data-table-footer": DataTableFooter,
-    "data-table-content": DataTableContent
+    'data-table-content': DataTableContent,
+    'combo-box': ComboBox,
   },
   props: {
     headers: {
       type: Array,
-      required: true
     },
     items: {
       type: Array,
-      default: []
+      default: Array.from([]),
     },
-    isExpansionPanel: {
+    isFixed: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
-  setup() {
-    function getObjectKeys(value: Object) {
+  setup(props, { slots }) {
+    const itemsDisplay = ref<Array<any>>(props.items);
+
+    const pagination = usePagination();
+
+    function init() {
+      pagination.maxPage.value = props.items.length;
+
+      itemsDisplay.value = pagination.getDisplayPages(props.items);
+    }
+
+    onUpdated(init);
+
+    onBeforeMount(init);
+
+    const getDisplayedData = computed(() => {
+      if (pagination.maxPage.value < 5) {
+        return ['5'];
+      }
+
+      const mass: Array<number> = [];
+      let kof = 1;
+
+      for (let i = 0; i < Math.floor(pagination.maxPage.value / 10); i += 1) {
+        kof *= 5;
+        if (kof >= pagination.maxPage.value) return mass;
+        mass.push(kof);
+      }
+
+      return mass;
+    });
+
+    const getLimitPageFix = computed(() => {
+      const page = pagination.page.value;
+      const limitPage = pagination.limitPage.value;
+      return page + limitPage > pagination.maxPage.value ? pagination.maxPage.value : page + limitPage;
+    });
+
+    function getObjectKeys(value: Record<string, never>) {
       if (value === null || value === undefined) return;
       return Object.keys(value);
     }
 
+    function isSlot(name: string) {
+      if (slots[name]) return true;
+      return false;
+    }
+
     return {
-      getObjectKeys
+      isSlot,
+      getObjectKeys,
+      maxPage: pagination.maxPage,
+      limitPage: pagination.limitPage,
+      page: pagination.page,
+      nextPage: () => pagination.nextPage(),
+      previousPage: () => pagination.previousPage(),
+      firstPage: () => pagination.firstPage(),
+      lastPage: () => pagination.lastPage(),
+      getDisplayedData,
+      getLimitPageFix,
+      itemsDisplay,
     };
-  }
+  },
 });
 </script>
 
@@ -114,85 +170,25 @@ export default defineComponent({
   padding: 1.5rem 2rem;
 }
 
-details {
-  background: #fff;
-  font-size: 16px;
+.data-footer {
   display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  font-size: 0.875rem;
 }
 
-details div.content {
-  padding: 0px 24px 24px 24px;
-}
-
-details[open] summary:after {
-  color: #9e9e9e;
-  content: "expand_less";
-  font-family: "Material Icons";
-}
-details[open] {
-  margin-top: 16px;
-  margin-bottom: 16px;
-  border: none;
-  border-radius: 2px;
-}
-details[open]:first-child {
-  margin-top: 0;
-  margin-bottom: 16px;
-  border: none;
-}
-details[open]:last-child {
-  margin-top: 16px;
-  margin-bottom: 0px;
-  border: none;
-}
-
-summary {
-  outline: none;
-  cursor: pointer;
-  padding: 16px 24px;
-  color: #212121;
-  position: relative;
-  font-size: 15px;
-}
-summary:hover {
-  background: #eeeeee;
-}
-
-details[open] summary:hover {
-  background: none;
-}
-summary ul {
-  padding-left: 0;
-  list-style: none;
-  display: -webkit-flex;
+.data-footer__select {
+  font-size: 0.875rem;
   display: flex;
   align-items: center;
+  flex: 0 0 0;
+  justify-content: flex-end;
+  white-space: nowrap;
 }
-summary ul li {
-  flex: 1 100%;
-  flex-flow: row wrap;
-}
-summary ul li span {
-  display: block;
-  font-size: 12px;
-  margin-top: 6px;
-  opacity: 0.75;
-}
-summary::-webkit-details-marker {
-  display: none;
-}
-summary::after {
-  content: "expand_more";
-  font-family: "Material Icons";
-  color: #9e9e9e;
-  font-size: 1.5em;
-  padding: 0;
-  text-align: center;
-  margin-top: 0;
-  position: absolute;
-  top: calc(50% - 12px);
-  bottom: 0;
-  right: 0;
-  width: 6%;
+
+.data-footer__pagination {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
 }
 </style>

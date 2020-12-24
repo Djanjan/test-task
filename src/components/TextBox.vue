@@ -1,28 +1,42 @@
 <template>
-  <div class="md-imput">
-    <input type="text" v-model="input" />
+  <div class="v-imput__content">
+    <input
+      class="v-imput"
+      id="text-box"
+      type="text"
+      v-model="input"
+      :placeholder="placeholder"
+      :aria-label="placeholder"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import { selectInput } from "../composables/SelectInput";
+import { selectInput } from '../composables/SelectInput';
 
 export default defineComponent({
-  name: "TextBox",
+  name: 'TextBox',
   props: {
-    modelValue: String
+    modelValue: String,
+    placeholder: {
+      type: String,
+      default: '',
+    },
   },
   setup(props, { emit }) {
     return {
-      input: selectInput(props, emit, "modelValue")
+      input: selectInput(props, emit, 'modelValue'),
     };
-  }
+  },
 });
 </script>
 
 <style scoped>
-.md-imput {
+.v-imput {
+  border-style: none;
+  border: none;
+  border-bottom: 2px solid var(--color-secondary);
 }
 </style>

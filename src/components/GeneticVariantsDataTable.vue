@@ -1,70 +1,90 @@
 <template>
-  <div>
-    <app-filter class="mt-1" :filterCriteria="getHeadersValue"></app-filter>
+  <v-card class="pt-1 mt-1">
+    <app-filter class="mt-1 ml-2"></app-filter>
 
-    <data-table
-      class="mt-1"
-      :headers="headers"
-      :items="getFilteredItems"
-    ></data-table>
-  </div>
+    <data-table :headers="headers" :items="variantsFiltered" :isFixed="true">
+      <template v-slot:genotype="{ item }">
+        <v-chips :outline="true" style="width: 60px">{{ item.genotype }}</v-chips>
+      </template>
+
+      <template v-slot:significance="{ item }">
+        <v-chips :color="item['significance'].color">{{ item['significance'].text }}</v-chips>
+      </template>
+
+      <template v-slot:hgvs="{ item }">
+        <v-chips :outline="true" style="width: 120px">{{ item.hgvs.g }}</v-chips>
+        <v-chips :outline="true" style="width: 120px">{{ item.hgvs.c }}</v-chips>
+        <v-chips :outline="true" style="width: 120px">{{ item.hgvs.p }}</v-chips>
+      </template>
+
+      <template v-slot:externalSourceEntries="{ item }">
+        <div class="contaiter_v-chips">
+          <v-chips
+            v-for="(expItem, index) in item['externalSourceEntries']"
+            :key="index"
+            :outline="true"
+            :color="expItem['significance'].color"
+          >
+            <a class="mr-1 ml-1" :href="expItem['link']">{{ expItem['name'] }}</a
+            ><span class="mr-1">{{ expItem['significance'].text }}</span>
+          </v-chips>
+        </div>
+      </template>
+    </data-table>
+  </v-card>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue";
+import { defineComponent, ref } from 'vue';
 
-import DataTable from "./DataTable.vue";
-import Filter from "./GeneticVariantsFilters.vue";
+import VCard from '@/components/VCard.vue';
+import VChips from '@/components/VChips.vue';
+import { Header } from '@/type/index';
+import DataTable from '@/components/DataTable.vue';
+import Filter from '@/components/GeneticVariantsFilters.vue';
 
-import { useFetchData } from "../composables/GeneticVariantsFetchData";
-import { useGeneticVariantsStore } from "../composables/GeneticVariantsStore";
+import { useGeneticVariantsStore } from '@/composables/GeneticVariantsStore';
 
 export default defineComponent({
-  name: "GeneticVariantsList",
+  name: 'GeneticVariantsDataTable',
   components: {
-    "data-table": DataTable,
-    "app-filter": Filter
+    'data-table': DataTable,
+    'app-filter': Filter,
+    'v-card': VCard,
+    'v-chips': VChips,
   },
   setup() {
-    const fetchData = useFetchData();
-    const { getFilteredItems } = useGeneticVariantsStore();
+    const { variantsFiltered } = useGeneticVariantsStore();
 
-    const headers = ref<Array<any>>([
-      { name: "Название", isExpansion: false, value: "name" },
+    const headers = ref<Array<Header>>([
+      { name: 'Название', columWidth: '50px', value: 'name' },
       {
-        name: "Значение значимости",
-        isExpansion: false,
-        value: "significance"
+        name: 'Значение значимости',
+        columWidth: '80px',
+        value: 'significance',
       },
-      { name: "Генотип", isExpansion: false, value: "genotype" },
-      { name: "HGVS номенклатура", isExpansion: false, value: "hgvs" },
+      { name: 'Генотип', columWidth: '50px', value: 'genotype' },
+      { name: 'HGVS номенклатура', columWidth: '90px', value: 'hgvs' },
       {
-        name: "Внешнии источники",
-        isExpansion: true,
-        value: "externalSourceEntries"
-      }
+        name: 'Внешнии источники',
+        columWidth: '320px',
+        value: 'externalSourceEntries',
+      },
     ]);
 
-    const getHeadersValue = computed(() => {
-      let headersValue = [];
-      for (const item of headers.value) {
-        if (!item["isExpansion"]) headersValue.push(item["value"]);
-      }
-      return headersValue;
-    });
-
-    onMounted(fetchData.getGenomVariants);
-
     return {
-      getFilteredItems,
+      variantsFiltered,
       headers,
-      getHeadersValue
     };
-  }
+  },
 });
 </script>
 
 <style scoped>
-.data-table {
+.contaiter_v-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  align-items: stretch;
 }
 </style>

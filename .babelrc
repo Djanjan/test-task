@@ -1,7 +1,0 @@
-{
-  "plugins": ["transform-regenerator"],
-  "presets": [
-    "@babel/env",
-    "@babel/typescript"
-  ]
-}

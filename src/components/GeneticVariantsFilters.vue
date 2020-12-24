@@ -1,77 +1,57 @@
 <template>
-  <div class="container">
-    <div class="ml-1">
-      <span>Фильтрация:</span>
-      <text-box v-model="inputText"></text-box>
-    </div>
-    <div class="ml-2">
-      <span>Критерии:</span>
-      <combo-box v-model="selectFilter" :items="filterCriteria"></combo-box>
+  <div class="input">
+    <div class="input__content">
+      <text-box v-model="inputText" :placeholder="'Поиск...'"></text-box>
+      <i class="material-icons">search</i>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  inject,
-  onMounted,
-  provide,
-  ref,
-  toRefs,
-  watch,
-} from "vue";
+import { defineComponent, ref, watch } from 'vue';
 
-import ComboBox from "./ComboBox.vue";
-import TextBox from "./TextBox.vue";
-
-import {
-  useGeneticVariantsStore,
-  GeneticVariant,
-} from "../composables/GeneticVariantsStore";
+import { useGeneticVariantsStore } from '@/composables/GeneticVariantsStore';
+import TextBox from '@/components/TextBox.vue';
 
 export default defineComponent({
-  name: "Filter",
+  name: 'Filter',
   components: {
-    "combo-box": ComboBox,
-    "text-box": TextBox,
+    'text-box': TextBox,
   },
-  props: {
-    filterCriteria: {
-      type: Array,
-      required: true,
-    },
-  },
-  setup(props, { emit }) {
-    const { filterCriteria } = toRefs(props);
-    const { getFilteredItems, filter } = useGeneticVariantsStore();
-    const inputText = ref("");
-    const selectFilter = ref(<string>filterCriteria.value[0]);
+  setup() {
+    const { filter } = useGeneticVariantsStore();
+    const inputText = ref('');
 
-    watch(selectFilter, () => (inputText.value = ""));
     watch(inputText, () => {
-      filter(selectFilter.value, inputText.value);
+      filter(inputText.value);
     });
 
     return {
       inputText,
-      filterCriteria,
-      selectFilter,
     };
   },
 });
 </script>
 
 <style scoped>
-.container {
+.input {
   display: flex;
   align-items: center;
 }
 
-.container > div > span {
+.input > div > span {
   font-size: 0.875rem;
   height: 48px;
   text-align: center;
+}
+
+.input__content {
+  align-items: center;
+  color: inherit;
+  display: flex;
+  margin-bottom: 8px;
+  min-height: inherit;
+  position: relative;
+  width: 100%;
 }
 </style>

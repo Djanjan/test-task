@@ -1,77 +1,113 @@
-import {
-  GeneticVariant,
-  ExternalSource,
-  HGVS,
-  useGeneticVariantsStore,
-} from "./GeneticVariantsStore";
+import { Significance, SignificanceParse, ExternalSource, HGVS, GeneticVariant } from '@/type/index';
+import { useGeneticVariantsStore } from '@/composables/GeneticVariantsStore';
 
-const URL: string = "../json/variants.json";
+import json from '../json/variants.json';
 
-import json from "../json/variants.json"
-
-const { variants, create } = useGeneticVariantsStore();
-
-interface IObject {
-  [key: string]: any;
-}
+const { push } = useGeneticVariantsStore();
 
 async function getGenomVariants() {
   try {
-    return json
+    return json;
   } catch (e) {
     return e;
   }
 }
 
-async function parserResponseToVariants(response: Array<IObject>) {
+function revisedRandId() {
+  return Math.random().toString(36);
+}
+
+function significanceParse(value: string) {
+  if (typeof value !== 'string') {
+    return {
+      color: '',
+      text: '',
+    };
+  }
+  const sign: SignificanceParse = {};
+
+  if (value.includes('LIKELY_PATHOGENIC')) {
+    sign.type = Significance.LIKELY_PATHOGENIC;
+    sign.text = 'Вероятно патогенный';
+    sign.color = '#FFC107';
+    return sign;
+  }
+  if (value.includes('LIKELY_BENIGN')) {
+    sign.type = Significance.LIKELY_BENIGN;
+    sign.text = 'Вероятно доброкачественный';
+    sign.color = '#82B1FF';
+    return sign;
+  }
+  if (value.includes('PATHOGENIC')) {
+    sign.type = Significance.PATHOGENIC;
+    sign.text = 'Патогенный';
+    sign.color = '#FF5252';
+    return sign;
+  }
+  if (value.includes('BENIGN')) {
+    sign.type = Significance.BENIGN;
+    sign.text = 'Доброкачественный';
+    sign.color = '#4CAF50';
+    return sign;
+  }
+  sign.type = Significance.UNDEFINED;
+  sign.text = 'Неопределенный';
+  sign.color = '#78909C';
+  return sign;
+}
+
+function genotypeParse(value: string) {
+  return value.includes('HO') ? 'АА | аа' : 'Аа | аА';
+}
+
+async function parserResponseToVariants(response: Array<{ [x: string]: any }>) {
   if (!response) return [];
 
   for (const item of response) {
-    let objHGVS: HGVS = {
-      c: item["hgvs"]["c"],
-      g: item["hgvs"]["g"],
-      p: item["hgvs"]["p"],
+    const objHGVS: HGVS = {
+      c: item.hgvs.c,
+      g: item.hgvs.g,
+      p: item.hgvs.p,
     };
 
-    let arraySource: Array<ExternalSource> = [];
+    const arraySource: Array<ExternalSource> = [];
 
-    for (const itemSource of item["externalSourceEntries"]) {
+    for (const itemSource of item.externalSourceEntries) {
       arraySource.push({
-        id: itemSource["id"],
-        link: itemSource["link"],
-        name: itemSource["database"]["name"],
-        version: itemSource["database"]["version"],
-        significance: itemSource["significance"],
+        id: itemSource.id,
+        link: itemSource.link,
+        name: itemSource.database.name,
+        version: itemSource.database.version,
+        significance: significanceParse(itemSource.significance || ''),
       });
     }
 
-    let objVariant: GeneticVariant = {
-      id: item["oy"],
-      name: item["alleleName"],
-      significance: item["significance"],
-      genotype: item["genotype"],
+    const objVariant: GeneticVariant = {
+      id: revisedRandId(),
+      name: item.alleleName,
+      significance: significanceParse(item.significance || ''),
+      genotype: genotypeParse(item.genotype),
       hgvs: objHGVS,
       externalSourceEntries: arraySource,
     };
-    create(objVariant)
+    push(objVariant);
   }
 }
 
 export function useFetchData() {
   const getVariants = async () => {
-    let res = await getGenomVariants();
+    const res = await getGenomVariants();
 
-    if (res.name === "Error") return console.log(res);
+    if (res.name === 'Error') return console.log(res);
 
     try {
-      await parserResponseToVariants(res.variants);
+      parserResponseToVariants(res.variants);
     } catch (e) {
       console.log(e);
     }
   };
 
   return {
-    response: variants,
     getGenomVariants: getVariants,
   };
 }

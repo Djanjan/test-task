@@ -2,7 +2,7 @@
   --color-primary: hsla(202, 91%, 13%, 1);
   --color-secondary: hsla(198, 48%, 63%, 1);
   --color-bg: white;
-  --color-contrast-lower: hsl(240, 1%, 90%);
+  --color-contrast-lower:white;
   --color-contrast-low: hsl(240, 1%, 83%);
   --color-contrast-medium: hsl(240, 1%, 48%);
   --color-contrast-high: hsl(240, 4%, 20%);
