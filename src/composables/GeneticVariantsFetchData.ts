@@ -1,16 +1,13 @@
 import { Significance, SignificanceParse, ExternalSource, HGVS, GeneticVariant } from '@/type/index';
 import { useGeneticVariantsStore } from '@/composables/GeneticVariantsStore';
 
-import json from '../json/variants.json';
+const variantsStore = useGeneticVariantsStore();
 
-const { push } = useGeneticVariantsStore();
+function fileParse(file: any) {
+  if (file === null || file === undefined) throw new Error('No genetic variants found');
+  if (!Object.prototype.hasOwnProperty.call(file, 'variants')) throw new Error('Genetic variants analysis error');
 
-async function getGenomVariants() {
-  try {
-    return json;
-  } catch (e) {
-    return e;
-  }
+  return file;
 }
 
 function revisedRandId() {
@@ -60,10 +57,10 @@ function genotypeParse(value: string) {
   return value.includes('HO') ? 'АА | аа' : 'Аа | аА';
 }
 
-async function parserResponseToVariants(response: Array<{ [x: string]: any }>) {
-  if (!response) return [];
+async function parserResponseToVariantsAsync(array: Array<{ [x: string]: any }>) {
+  if (!array) throw new Error('No input parameter specified');
 
-  for (const item of response) {
+  for (const item of array) {
     const objHGVS: HGVS = {
       c: item.hgvs.c,
       g: item.hgvs.g,
@@ -90,20 +87,18 @@ async function parserResponseToVariants(response: Array<{ [x: string]: any }>) {
       hgvs: objHGVS,
       externalSourceEntries: arraySource,
     };
-    push(objVariant);
+    variantsStore.push(objVariant);
   }
 }
 
-export function useFetchData() {
+export function useFetchData(file: any) {
   const getVariants = async () => {
-    const res = await getGenomVariants();
-
-    if (res.name === 'Error') return console.log(res);
+    const result = fileParse(file);
 
     try {
-      parserResponseToVariants(res.variants);
+      await parserResponseToVariantsAsync(result.variants);
     } catch (e) {
-      console.log(e);
+      throw new Error(e);
     }
   };
 

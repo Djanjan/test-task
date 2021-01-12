@@ -2,35 +2,40 @@
   <v-card class="pt-1 mt-1">
     <app-filter class="mt-1 ml-2"></app-filter>
 
-    <data-table :headers="headers" :items="variantsFiltered" :isFixed="true">
-      <template v-slot:genotype="{ item }">
-        <v-chips :outline="true" style="width: 60px">{{ item.genotype }}</v-chips>
-      </template>
+    <template v-if="variantsFiltered.length !== 0">
+      <data-table :headers="headers" :items="variantsFiltered" :isFixed="true">
+        <template v-slot:genotype="{ item }">
+          <v-chips :outline="true" style="width: 60px">{{ item.genotype }}</v-chips>
+        </template>
 
-      <template v-slot:significance="{ item }">
-        <v-chips :color="item['significance'].color">{{ item['significance'].text }}</v-chips>
-      </template>
+        <template v-slot:significance="{ item }">
+          <v-chips :color="item['significance'].color">{{ item['significance'].text }}</v-chips>
+        </template>
 
-      <template v-slot:hgvs="{ item }">
-        <v-chips :outline="true" style="width: 120px">{{ item.hgvs.g }}</v-chips>
-        <v-chips :outline="true" style="width: 120px">{{ item.hgvs.c }}</v-chips>
-        <v-chips :outline="true" style="width: 120px">{{ item.hgvs.p }}</v-chips>
-      </template>
+        <template v-slot:hgvs="{ item }">
+          <v-chips :outline="true" style="width: 120px">{{ item.hgvs.g }}</v-chips>
+          <v-chips :outline="true" style="width: 120px">{{ item.hgvs.c }}</v-chips>
+          <v-chips :outline="true" style="width: 120px">{{ item.hgvs.p }}</v-chips>
+        </template>
 
-      <template v-slot:externalSourceEntries="{ item }">
-        <div class="contaiter_v-chips">
-          <v-chips
-            v-for="(expItem, index) in item['externalSourceEntries']"
-            :key="index"
-            :outline="true"
-            :color="expItem['significance'].color"
-          >
-            <a class="mr-1 ml-1" :href="expItem['link']">{{ expItem['name'] }}</a
-            ><span class="mr-1">{{ expItem['significance'].text }}</span>
-          </v-chips>
-        </div>
-      </template>
-    </data-table>
+        <template v-slot:externalSourceEntries="{ item }">
+          <div class="contaiter_v-chips">
+            <v-chips
+              v-for="(expItem, index) in item['externalSourceEntries']"
+              :key="index"
+              :outline="true"
+              :color="expItem['significance'].color"
+            >
+              <a class="mr-1 ml-1" :href="expItem['link']">{{ expItem['name'] }}</a
+              ><span class="mr-1">{{ expItem['significance'].text }}</span>
+            </v-chips>
+          </div>
+        </template>
+      </data-table>
+    </template>
+    <template v-else>
+      <div class="pa-1 pl-2">Нечего не найдено</div>
+    </template>
   </v-card>
 </template>
 
